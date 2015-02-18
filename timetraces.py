@@ -96,7 +96,7 @@ def get_on_periods_slices(timetrace, threshold, lowpass_sigma=15, align=4):
     return on_periods
 
 def get_on_periods_timetrace(timetrace, threshold, lowpass_sigma=15, align=4):
-    """Compute a timetrace by stiching together the on-periods during blinking.
+    """Compute a timetrace by stitching together on-periods of blinking.
 
     Returns:
         A tuple of arrays (time, trace).
