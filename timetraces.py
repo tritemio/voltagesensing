@@ -12,18 +12,18 @@ import scipy.ndimage as ndi
 #  Timetrace extraction and processing: detrend and blinking
 #
 
-def get_square_mask(point, pad=2):
+def get_roi_square(point, pad=2):
     col, row = point
     mask = (slice(None), slice(row-pad, row+pad+1), slice(col-pad, col+pad+1))
     return mask
 
 def get_timetrace_square(video, point, pad=2):
-    mask = get_square_mask(point, pad)
+    mask = get_roi_square(point, pad)
     timetrace = video[mask].mean(1).mean(1)
     return timetrace
 
 
-def get_circle_mask(point, clip_radius, shape2d):
+def get_roi_circle(point, clip_radius, shape2d):
     # Get integer and fractional part of the point coordinate
     xfrac, col = np.modf(point[0])
     yfrac, row = np.modf(point[1])
@@ -41,7 +41,7 @@ def get_circle_mask(point, clip_radius, shape2d):
     return imask
 
 def get_timetrace_circle(video, point, clip_radius=2):
-    imask = get_circle_mask(point, clip_radius, video.shape[1:])
+    imask = get_roi_circle(point, clip_radius, video.shape[1:])
     timetrace = np.zeros(video.shape[0])
     for i in range(timetrace.size):
         timetrace[i] = video[i, imask[0], imask[1]].mean()
@@ -56,7 +56,7 @@ def get_timetrace(video, point, clip_radius=1.5, detrend_sigma=250):
         timetrace -= ndi.filters.gaussian_filter1d(timetrace, detrend_sigma)
     return timetrace
 
-def get_on_blinking_slices(timetrace, threshold, lowpass_sigma=15, align=4):
+def get_on_periods_slices(timetrace, threshold, lowpass_sigma=15, align=4):
     lp_timetrace = ndi.filters.gaussian_filter1d(timetrace, lowpass_sigma)
     on_mask = lp_timetrace >= threshold
 
@@ -77,10 +77,9 @@ def get_on_blinking_slices(timetrace, threshold, lowpass_sigma=15, align=4):
         on_periods.append(slice(start, timetrace.size))
     return on_periods
 
-def get_on_blinking_timetrace(timetrace, threshold, lowpass_sigma=15, align=4):
-    on_slices = get_on_blinking_slices(timetrace, threshold,
-                                       lowpass_sigma=lowpass_sigma,
-                                       align=align)
+def get_on_periods_timetrace(timetrace, threshold, lowpass_sigma=15, align=4):
+    on_slices = get_on_periods_slices(timetrace, threshold,
+                                      lowpass_sigma=lowpass_sigma, align=align)
     time = np.arange(timetrace.size)
     time_list, trace_list = [], []
 
