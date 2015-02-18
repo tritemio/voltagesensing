@@ -13,17 +13,23 @@ import scipy.ndimage as ndi
 #
 
 def get_roi_square(point, pad=2):
+    """Return a square selection of pixels around `point`.
+    """
     col, row = point
     mask = (slice(None), slice(row-pad, row+pad+1), slice(col-pad, col+pad+1))
     return mask
 
 def get_timetrace_square(video, point, pad=2):
+    """Returna a timetrace from `video` by averaging a square pixel selection.
+    """
     mask = get_roi_square(point, pad)
     timetrace = video[mask].mean(1).mean(1)
     return timetrace
 
 
 def get_roi_circle(point, clip_radius, shape2d):
+    """Return a circular selection of pixels around `point`.
+    """
     # Get integer and fractional part of the point coordinate
     xfrac, col = np.modf(point[0])
     yfrac, row = np.modf(point[1])
@@ -41,6 +47,8 @@ def get_roi_circle(point, clip_radius, shape2d):
     return imask
 
 def get_timetrace_circle(video, point, clip_radius=2):
+    """Returna a timetrace from `video` by averaging a "circular" region.
+    """
     imask = get_roi_circle(point, clip_radius, video.shape[1:])
     timetrace = np.zeros(video.shape[0])
     for i in range(timetrace.size):
@@ -49,6 +57,11 @@ def get_timetrace_circle(video, point, clip_radius=2):
 
 
 def get_timetrace(video, point, clip_radius=1.5, detrend_sigma=250):
+    """Returna a processed timetrace from a "circular" region.
+
+    The timetrace processing removes the mean and applies a detrend filter
+    that is a time-domain Gaussian filter.
+    """
     timetrace = get_timetrace_circle(video, point, clip_radius=clip_radius)
     timetrace -= timetrace.mean()
     # Detrend very slow variations
@@ -57,6 +70,8 @@ def get_timetrace(video, point, clip_radius=1.5, detrend_sigma=250):
     return timetrace
 
 def get_on_periods_slices(timetrace, threshold, lowpass_sigma=15, align=4):
+    """Returns a list of slices selecting the on-periods during blinking.
+    """
     lp_timetrace = ndi.filters.gaussian_filter1d(timetrace, lowpass_sigma)
     on_mask = lp_timetrace >= threshold
 
@@ -78,6 +93,11 @@ def get_on_periods_slices(timetrace, threshold, lowpass_sigma=15, align=4):
     return on_periods
 
 def get_on_periods_timetrace(timetrace, threshold, lowpass_sigma=15, align=4):
+    """Compute a timetrace by stiching together the on-periods during blinking.
+
+    Returns:
+        A tuple of arrays (time, trace).
+    """
     on_slices = get_on_periods_slices(timetrace, threshold,
                                       lowpass_sigma=lowpass_sigma, align=align)
     time = np.arange(timetrace.size)
