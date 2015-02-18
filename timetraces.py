@@ -1,9 +1,12 @@
-# -*- coding: utf-8 -*-
+#
+# Copyright 2015 Antonino Ingargiola <tritemio@gmail.com>
+#
 """
-Created on Tue Feb 17 10:47:34 2015
+This module defines functions to extract timetraces from video ROIs,
+filter the timetraces (detrend, smoothing), identify blinking and
+compute the signal alternation in phase with the patch-clamp signal.
+"""
 
-@author: temp
-"""
 import numpy as np
 import scipy.ndimage as ndi
 

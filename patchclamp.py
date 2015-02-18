@@ -1,5 +1,9 @@
+#
+# Copyright 2015 Antonino Ingargiola <tritemio@gmail.com>
+#
 """
-This module defines a container class for patch-clamp experiments.
+This module defines a container class for voltage-sensing patch-clamp
+experiments.
 """
 
 from io import open
