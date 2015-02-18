@@ -102,7 +102,7 @@ class PatchDataset:
         return self._time
 
     def _read_dac_coldata(self, name):
-        """Read the column `name` from self.daq downsampling to camera rate.
+        """Read the column `name` from self.daq and downsample to camera rate.
         """
         decimate = self.daq_rate/self.camera_rate
         coldata = np.array(self.daq[name])
