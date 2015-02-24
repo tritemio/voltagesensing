@@ -154,6 +154,32 @@ def double_edge_diff_avg(timetrace, offset=0):
     avg_timetrace = block_average(timetrace, offset=offset, num_samples=2)
     return avg_timetrace[:-2:2] - 2*avg_timetrace[1:-1:2] + avg_timetrace[2::2]
 
+def edge_diff_avg(timetrace, offset=0, first_pair=True):
+    """Return an array of non-overlapping pairs differences.
+
+    This function takes the full 4-frame per period timetrace,
+    applies a 2-sample average, and compute the rising or falling edge
+    differences. The offset is applied before the 2-frame averaging.
+
+    0   2   4   6
+    *   *   *   *             t[0] - t[1], t[2] - t[3]  if first_pair == True
+      *   *   *   *           t[2] - t[1], t[4] - t[3]  if first_pair == False
+      1   3   5   7
+    """
+    avg_timetrace = block_average(timetrace, offset=offset, num_samples=2)
+    if first_pair:
+        first_term = avg_timetrace[:-2:2]
+    else:
+        first_term = avg_timetrace[2::2]
+    return first_term - avg_timetrace[1:-1:2]
+
+def test_edge_diff(timetrace, offset=0):
+    diff1 = double_edge_diff_avg(timetrace, offset=offset)
+    diff2 = edge_diff_avg(timetrace, offset=offset, first_pair=True) + \
+            edge_diff_avg(timetrace, offset=offset, first_pair=False)
+    assert np.allclose(diff1, diff2), 'The two arrays differs.'
+
+
 def double_edge_diff(timetrace, offset=0):
     """
     Return an array of raising/falling edge differences.
