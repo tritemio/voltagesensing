@@ -146,10 +146,16 @@ def double_edge_diff_avg(timetrace, offset=0):
     applies a 2-sample average, and compute the rising/falling edge
     differences. The offset is applied before the 2-frame averaging.
 
+    After the 2-sample average we compute:
+
     0   2   4   6
-    *   *   *   *             (t[0] - t[1]) + (t[2] - t[1])
-      *   *   *   *
+    *   *   *   *
+     \ / \ / \ /            (t[0] - t[1]) + (t[2] - t[1])
+      *   *   *  (*)
       1   3   5   7
+
+    the sum of all the consecutive falling and rising edges marked in
+    figure. Note that the last sample (i.e. 7) is always discarded.
     """
     avg_timetrace = block_average(timetrace, offset=offset, num_samples=2)
     return avg_timetrace[:-2:2] - 2*avg_timetrace[1:-1:2] + avg_timetrace[2::2]
@@ -161,10 +167,16 @@ def edge_diff_avg(timetrace, offset=0, first_pair=True):
     applies a 2-sample average, and compute the rising or falling edge
     differences. The offset is applied before the 2-frame averaging.
 
+    After the 2-sample average we compute:
+
     0   2   4   6
-    *   *   *   *             t[0] - t[1], t[2] - t[3]  if first_pair == True
-      *   *   *   *           t[2] - t[1], t[4] - t[3]  if first_pair == False
+    *   *   *   *     t[0] - t[1], t[2] - t[3], ...  if first_pair == True
+     \ / \ / \ /      t[2] - t[1], t[4] - t[3], ...  if first_pair == False
+      *   *   *  (*)
       1   3   5   7
+
+    the marked falling (first_pair=True) or rising (first_pair=False)
+    edges. Note that the last sample (i.e. 7) is always discarded.
     """
     avg_timetrace = block_average(timetrace, offset=offset, num_samples=2)
     if first_pair:
@@ -178,21 +190,3 @@ def test_edge_diff(timetrace, offset=0):
     diff2 = edge_diff_avg(timetrace, offset=offset, first_pair=True) + \
             edge_diff_avg(timetrace, offset=offset, first_pair=False)
     assert np.allclose(diff1, diff2), 'The two arrays differs.'
-
-
-def double_edge_diff(timetrace, offset=0):
-    """
-    Return an array of raising/falling edge differences.
-
-    This function takes the full 4-frame per period timetrace
-    and compute the rising/falling edge differences without
-    any 2-frame averaging.
-
-    0 1     4 5     8 9
-    * *     * *     * *        (t[1] - t[2]) + (t[4] - t[3])
-        * *     * *     * *
-        2 3     6 7
-    """
-    timetrace_o = timetrace[offset:]
-    return timetrace_o[1:-3:4] - timetrace_o[2:-2:4] + \
-           timetrace_o[4::4] - timetrace_o[3:-1:4]
