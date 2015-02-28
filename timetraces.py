@@ -6,6 +6,7 @@ This module defines functions to extract timetraces from video ROIs,
 filter the timetraces (detrend, smoothing), identify blinking and
 compute the signal alternation in phase with the patch-clamp signal.
 """
+from __future__ import division
 
 import numpy as np
 import scipy.ndimage as ndi
@@ -124,7 +125,7 @@ def block_average(timetrace_in, offset=0, num_samples=2):
     avg_data = timetrace_in[offset:offset + avg_size*num_samples]
     return avg_data.reshape(avg_size, num_samples).mean(1)
 
-def running_average(timetrace_in, offset=0, num_samples=2):
+def running_average(timetrace_in, num_samples=2):
     """Return an array of n-elements running average.
     """
     assert num_samples > 0
@@ -184,6 +185,61 @@ def edge_diff_avg(timetrace, offset=0, first_pair=True):
     else:
         first_term = avg_timetrace[2::2]
     return first_term - avg_timetrace[1:-1:2]
+
+def edge_diff_avg_alt(timetrace, offset=0):
+    """Return an array differences with alternating sign.
+
+    This function takes the full 4-frame per period timetrace,
+    applies a 2-sample average, and compute the rising or falling edge
+    differences. The offset is applied before the 2-frame averaging.
+
+    After the 2-sample average, we compute:
+
+    0   2   4   6
+    *   *   *   *     (t[0] - t[1]),
+     \ / \ / \ / \    (t[2] - t[1]),
+      *   *   *   *   (t[2] - t[3]), ...
+      1   3   5   7
+
+    that is the array of differences with alternating sign.
+    """
+    avg_timetrace = block_average(timetrace, offset=offset, num_samples=2)
+    res = np.diff(avg_timetrace)
+    res[::2] *= -1
+    return res
+
+def edge_diff_avg_ndiff(timetrace, offset=0, ndiff=2, running_avg=True):
+    """Return an array of edge differences averaged over `nperiods`.
+
+    This function takes the full 4-frame per period timetrace,
+    applies a 2-sample average, and compute the rising or falling edge
+    differences. The offset is applied before the 2-frame averaging.
+
+    After the 2-sample average, for ndiff = 1, we compute:
+
+    0   2   4   6
+    *   *   *   *     (t[0] - t[1]),
+     \ / \ / \ / \    (t[2] - t[1]),
+      *   *   *   *   (t[2] - t[3]), ...
+      1   3   5   7
+
+    After the 2-sample average, for ndiff = 2, we compute:
+
+    0   2   4   6
+    *   *   *   *      (t[0] - t[1]) + (t[2] - t[1]),
+     \ / \ / \ / \     (t[2] - t[1]) + (t[2] - t[3]), ...
+      *   *   *   *
+      1   3   5   7
+
+    and so on.
+    """
+    alt_diff = edge_diff_avg_alt(timetrace, offset=offset)
+    if running_avg:
+        res = running_average(alt_diff, num_samples=ndiff)
+    else:
+        nrows, ncols = alt_diff.size//ndiff, ndiff
+        res = alt_diff[:nrows*ncols].reshape(nrows, ncols).mean(axis=1)
+    return res
 
 def test_edge_diff(timetrace, offset=0):
     diff1 = double_edge_diff_avg(timetrace, offset=offset)

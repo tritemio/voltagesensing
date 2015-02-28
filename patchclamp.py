@@ -5,8 +5,9 @@
 This module defines a container class for voltage-sensing patch-clamp
 experiments.
 """
-
+from __future__ import division
 from io import open
+
 import os
 import numpy as np
 import pandas as pd
