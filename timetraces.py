@@ -155,11 +155,11 @@ def avg_nsamples(samples, num_samples, running_avg=True, offset=0):
 #  Alternation detection
 #
 def edge_diff_sum(timetrace, offset=0):
-    """Return an array of rising/falling edges differences.
+    """Return an array of sum of rising + falling edges differences.
 
     This function takes the full 4-frame per period timetrace,
-    applies a 2-sample average, and compute the rising/falling edge
-    differences. The offset is applied before the 2-frame averaging.
+    applies a 2-sample average, and compute the sum of the rising and falling
+    edges differences. The offset is applied before the 2-frame averaging.
 
     After the 2-sample average we compute:
 
@@ -177,13 +177,14 @@ def edge_diff_sum(timetrace, offset=0):
 
 
 def edge_diff_1pair(timetrace, offset=0, first_pair=True):
-    """Return an array of non-overlapping pairs differences.
+    """Return an array of rise **or** falling edges differences.
 
     This function takes the full 4-frame per period timetrace,
     applies a 2-sample average, and compute the rising or falling edge
     differences. The offset is applied before the 2-frame averaging.
 
-    After the 2-sample average we compute:
+    After the 2-sample average we compute all the marked falling
+    (first_pair=True) or rising (first_pair=False) edges:
 
     0   2   4   6
     *   *   *   *     t[0] - t[1], t[2] - t[3], ...  if first_pair == True
@@ -191,8 +192,7 @@ def edge_diff_1pair(timetrace, offset=0, first_pair=True):
       *   *   *  (*)
       1   3   5   7
 
-    the marked falling (first_pair=True) or rising (first_pair=False)
-    edges. Note that the last sample (i.e. 7) is always discarded.
+    Note that the last sample (i.e. 7) is always discarded.
     """
     avg_timetrace = block_average(timetrace[offset:], num_samples=2)
     if first_pair:
@@ -202,21 +202,21 @@ def edge_diff_1pair(timetrace, offset=0, first_pair=True):
     return first_term - avg_timetrace[1:-1:2]
 
 def edge_diff_all(timetrace, offset=0):
-    """Return an array of all the differences with alternating sign.
+    """Return an array of all the differences (falling **and** rising edges).
 
     This function takes the full 4-frame per period timetrace,
     applies a 2-sample average, and compute the rising or falling edge
     differences. The offset is applied before the 2-frame averaging.
 
-    After the 2-sample average, we compute:
+    After the 2-sample average we compute the array of differences with
+    alternating sign:
 
     0   2   4   6
-    *   *   *   *     (t[0] - t[1]),
-     \ / \ / \ / \    (t[2] - t[1]),
-      *   *   *   *   (t[2] - t[3]), ...
+    *   *   *   *      - (t[1] - t[0]),
+     \ / \ / \ / \       (t[2] - t[1]),
+      *   *   *   *    - (t[3] - t[2]), ...
       1   3   5   7
 
-    that is the array of differences with alternating sign.
     """
     avg_timetrace = block_average(timetrace[offset:], num_samples=2)
     res = np.diff(avg_timetrace)
