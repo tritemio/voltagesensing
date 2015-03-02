@@ -113,34 +113,48 @@ def get_on_periods_timetrace(timetrace, threshold, lowpass_sigma=15, align=4):
 
 
 ##
-#  Alternation detection
+#  Averaging functions
 #
-def block_average(timetrace_in, offset=0, num_samples=2):
+def block_average(samples, num_samples):
     """Return an array of non-overlapping n-elements averages.
     """
     assert num_samples > 0
-    if num_samples == 1: return timetrace_in
+    if num_samples == 1: return samples
 
-    avg_size = (timetrace_in.size - offset) // num_samples
-    avg_data = timetrace_in[offset:offset + avg_size*num_samples]
-    return avg_data.reshape(avg_size, num_samples).mean(1)
+    avg_size = samples.size // num_samples
+    avg_data = samples[:avg_size*num_samples]
+    return avg_data.reshape(avg_size, num_samples).mean(axis=1)
 
-def running_average(timetrace_in, num_samples=2):
+def running_average(samples, num_samples):
     """Return an array of n-elements running average.
     """
     assert num_samples > 0
-    if num_samples == 1: return timetrace_in
+    if num_samples == 1: return samples
 
-    avg_size = timetrace_in.size - num_samples + 1
-    avg_timetrace = np.zeros(avg_size)
-    avg_timetrace[0] = timetrace_in[:num_samples].sum()
-    for i in range(1, avg_size):
-        avg_timetrace[i] = avg_timetrace[i-1] - \
-                           timetrace_in[i-1] + timetrace_in[i + num_samples -1]
-    return avg_timetrace / num_samples
+    weigths = np.repeat(1.0, num_samples)/num_samples
+    return np.convolve(samples, weigths, mode='valid')
+
+def avg_nsamples(samples, num_samples, running_avg=True, offset=0):
+    """Return an array with `samples` averaged every `num_samples`.
+
+    Arguments:
+        running_avg (bool): if True, computes the average sliding the window
+            by one sample a time (running average). Else computes the average
+            in "blocks", i.e. on each non-overlapping adjacent windows.
+        offset (int): number of initial samples to drop in the input array.
+    """
+    samples = samples[offset:]
+    if running_avg:
+        avg_func = running_average
+    else:
+        avg_func = block_average
+    return avg_func(samples, num_samples=num_samples)
 
 
-def double_edge_diff_avg(timetrace, offset=0):
+##
+#  Alternation detection
+#
+def edge_diff_sum(timetrace, offset=0):
     """Return an array of rising/falling edges differences.
 
     This function takes the full 4-frame per period timetrace,
@@ -158,10 +172,11 @@ def double_edge_diff_avg(timetrace, offset=0):
     the sum of all the consecutive falling and rising edges marked in
     figure. Note that the last sample (i.e. 7) is always discarded.
     """
-    avg_timetrace = block_average(timetrace, offset=offset, num_samples=2)
+    avg_timetrace = block_average(timetrace[offset:], num_samples=2)
     return avg_timetrace[:-2:2] - 2*avg_timetrace[1:-1:2] + avg_timetrace[2::2]
 
-def edge_diff_avg(timetrace, offset=0, first_pair=True):
+
+def edge_diff_1pair(timetrace, offset=0, first_pair=True):
     """Return an array of non-overlapping pairs differences.
 
     This function takes the full 4-frame per period timetrace,
@@ -179,15 +194,15 @@ def edge_diff_avg(timetrace, offset=0, first_pair=True):
     the marked falling (first_pair=True) or rising (first_pair=False)
     edges. Note that the last sample (i.e. 7) is always discarded.
     """
-    avg_timetrace = block_average(timetrace, offset=offset, num_samples=2)
+    avg_timetrace = block_average(timetrace[offset:], num_samples=2)
     if first_pair:
         first_term = avg_timetrace[:-2:2]
     else:
         first_term = avg_timetrace[2::2]
     return first_term - avg_timetrace[1:-1:2]
 
-def edge_diff_avg_alt(timetrace, offset=0):
-    """Return an array differences with alternating sign.
+def edge_diff_all(timetrace, offset=0):
+    """Return an array of all the differences with alternating sign.
 
     This function takes the full 4-frame per period timetrace,
     applies a 2-sample average, and compute the rising or falling edge
@@ -203,46 +218,25 @@ def edge_diff_avg_alt(timetrace, offset=0):
 
     that is the array of differences with alternating sign.
     """
-    avg_timetrace = block_average(timetrace, offset=offset, num_samples=2)
+    avg_timetrace = block_average(timetrace[offset:], num_samples=2)
     res = np.diff(avg_timetrace)
     res[::2] *= -1
     return res
 
-def edge_diff_avg_ndiff(timetrace, offset=0, ndiff=2, running_avg=True):
-    """Return an array of edge differences averaged over `nperiods`.
+##
+#  Tests
+#
+def test_edge_diff_all(timetrace, offset=0):
+    diff_all = edge_diff_all(timetrace, offset=offset)
+    even_size = (diff_all.size // 2)*2
+    diff1 = edge_diff_1pair(timetrace, offset=offset, first_pair=True)
+    diff2 = edge_diff_1pair(timetrace, offset=offset, first_pair=False)
+    msg =  'The two arrays differ.'
+    assert np.allclose(diff_all[:even_size:2], diff1), msg
+    assert np.allclose(diff_all[1:even_size:2], diff2), msg
 
-    This function takes the full 4-frame per period timetrace,
-    applies a 2-sample average, and compute the rising or falling edge
-    differences. The offset is applied before the 2-frame averaging.
-
-    After the 2-sample average, for ndiff = 1, we compute:
-
-    0   2   4   6
-    *   *   *   *     (t[0] - t[1]),
-     \ / \ / \ / \    (t[2] - t[1]),
-      *   *   *   *   (t[2] - t[3]), ...
-      1   3   5   7
-
-    After the 2-sample average, for ndiff = 2, we compute:
-
-    0   2   4   6
-    *   *   *   *      (t[0] - t[1]) + (t[2] - t[1]),
-     \ / \ / \ / \     (t[2] - t[1]) + (t[2] - t[3]), ...
-      *   *   *   *
-      1   3   5   7
-
-    and so on.
-    """
-    alt_diff = edge_diff_avg_alt(timetrace, offset=offset)
-    if running_avg:
-        res = running_average(alt_diff, num_samples=ndiff)
-    else:
-        nrows, ncols = alt_diff.size//ndiff, ndiff
-        res = alt_diff[:nrows*ncols].reshape(nrows, ncols).mean(axis=1)
-    return res
-
-def test_edge_diff(timetrace, offset=0):
-    diff1 = double_edge_diff_avg(timetrace, offset=offset)
-    diff2 = edge_diff_avg(timetrace, offset=offset, first_pair=True) + \
-            edge_diff_avg(timetrace, offset=offset, first_pair=False)
-    assert np.allclose(diff1, diff2), 'The two arrays differs.'
+def test_edge_diff_sum(timetrace, offset=0):
+    diff1 = edge_diff_sum(timetrace, offset=offset)
+    diff2 = edge_diff_1pair(timetrace, offset=offset, first_pair=True) + \
+            edge_diff_1pair(timetrace, offset=offset, first_pair=False)
+    assert np.allclose(diff1, diff2), 'The two arrays differ.'
