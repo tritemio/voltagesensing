@@ -226,17 +226,19 @@ def edge_diff_all(timetrace, offset=0):
 ##
 #  Tests
 #
-def test_edge_diff_all(timetrace, offset=0):
+def test_edge_diff(timetrace, offset=0):
     diff_all = edge_diff_all(timetrace, offset=offset)
     even_size = (diff_all.size // 2)*2
     diff1 = edge_diff_1pair(timetrace, offset=offset, first_pair=True)
     diff2 = edge_diff_1pair(timetrace, offset=offset, first_pair=False)
+
+    diff_sum1 = edge_diff_sum(timetrace, offset=offset)
+    diff_sum2 = diff_all[:even_size:2] + diff_all[1:even_size:2]
+    diff_sum3 = edge_diff_1pair(timetrace, offset=offset, first_pair=True) + \
+                edge_diff_1pair(timetrace, offset=offset, first_pair=False)
+
     msg =  'The two arrays differ.'
     assert np.allclose(diff_all[:even_size:2], diff1), msg
     assert np.allclose(diff_all[1:even_size:2], diff2), msg
-
-def test_edge_diff_sum(timetrace, offset=0):
-    diff1 = edge_diff_sum(timetrace, offset=offset)
-    diff2 = edge_diff_1pair(timetrace, offset=offset, first_pair=True) + \
-            edge_diff_1pair(timetrace, offset=offset, first_pair=False)
-    assert np.allclose(diff1, diff2), 'The two arrays differ.'
+    assert np.allclose(diff_sum1, diff_sum2), msg
+    assert np.allclose(diff_sum1, diff_sum3), msg
