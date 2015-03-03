@@ -4,6 +4,9 @@
         src: url('http://mirrors.ctan.org/fonts/cm-unicode/fonts/otf/cmunss.otf');
     }
 
+    div.container{
+        width: 95%;
+    }
     .CodeMirror{
             font-family: "Source Code Pro", source-code-pro,Consolas, monospace;
     }
