@@ -20,7 +20,7 @@ def get_roi_square(point, pad=2):
     """Return a square selection of pixels around `point`.
     """
     col, row = point
-    mask = (slice(None), slice(row-pad, row+pad+1), slice(col-pad, col+pad+1))
+    mask = (slice(row-pad, row+pad+1), slice(col-pad, col+pad+1))
     return mask
 
 def get_timetrace_square(video, point, pad=2):
