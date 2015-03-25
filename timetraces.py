@@ -60,14 +60,16 @@ def get_timetrace_circle(video, point, clip_radius=2):
     return timetrace
 
 
-def get_timetrace(video, point, clip_radius=1.5, detrend_sigma=250):
+def get_timetrace(video, point, clip_radius=1.5, detrend_sigma=None,
+                  zero_mean=True):
     """Returna a processed timetrace from a "circular" region.
 
     The timetrace processing removes the mean and applies a detrend filter
     that is a time-domain Gaussian filter.
     """
     timetrace = get_timetrace_circle(video, point, clip_radius=clip_radius)
-    timetrace -= timetrace.mean()
+    if zero_mean:
+        timetrace -= timetrace.mean()
     # Detrend very slow variations
     if detrend_sigma is not None and detrend_sigma > 0:
         timetrace -= ndi.filters.gaussian_filter1d(timetrace, detrend_sigma)
