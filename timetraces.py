@@ -61,19 +61,23 @@ def get_timetrace_circle(video, point, clip_radius=2):
 
 
 def get_timetrace(video, point, clip_radius=1.5, detrend_sigma=None,
-                  zero_mean=True):
+                  zero_mean=True, return_mean=False):
     """Returna a processed timetrace from a "circular" region.
 
-    The timetrace processing removes the mean and applies a detrend filter
-    that is a time-domain Gaussian filter.
+    By default the timetrace processing removes the mean and applies
+    a detrend filter that is a time-domain Gaussian filter.
     """
     timetrace = get_timetrace_circle(video, point, clip_radius=clip_radius)
+    timetrace_mean = timetrace.mean()
     if zero_mean:
-        timetrace -= timetrace.mean()
+        timetrace -= timetrace_mean
     # Detrend very slow variations
     if detrend_sigma is not None and detrend_sigma > 0:
         timetrace -= ndi.filters.gaussian_filter1d(timetrace, detrend_sigma)
-    return timetrace
+    if return_mean:
+        return timetrace, timetrace_mean
+    else:
+        return timetrace
 
 def get_on_periods_slices(timetrace, threshold, lowpass_sigma=15, align=4):
     """Returns a list of slices selecting the on-periods during blinking.
