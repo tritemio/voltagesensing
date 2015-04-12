@@ -229,6 +229,44 @@ def edge_diff_all(timetrace, offset=0):
     res[::2] *= -1
     return res
 
+
+def t_diffall(tot_size, inphase=True, start=0):
+    """
+    Return the time axis for the signal coimpute by `edge_diff_all()`.
+
+    `start` is the time of the first in-phase signal sample. It can be 0
+    or 1.5 (for centering each sample in the middle of the 4 frames).
+
+    The time is computed according to this scheme:
+
+    0 1 2 3 4 5 6 7   --> Original frames
+    * * * * * * * *
+    '-' '-' '-' '-'
+     '---'---'---'
+      1.5 3.5 5.5     --> Times of in-phase signal
+
+    0 1 2 3 4 5 6 7   --> Original frames
+    * * * * * * * *
+      '-' '-' '-'
+       '---'---'
+        2.5 4.5       --> Times of out-of-phase signal
+    """
+    time_size = (tot_size)/2 - 1
+    #start = 0 #1.5
+    if not inphase:
+        time_size -= 1
+        start += 1
+    time = np.arange(time_size)*2 + start
+    return time
+
+def t_ravg(tot_size, inphase, num_samples, delta_t=2):
+    """
+    Return the time axis of running averages of signal from `edge_diff_all()`.
+    """
+    time = t_diffall(tot_size, inphase)[:-(num_samples - 1)]
+    time += delta_t*((num_samples - 1)/2)
+    return time
+
 ##
 #  Tests
 #
