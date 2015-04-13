@@ -102,13 +102,39 @@ class PatchDataset:
             self._time = np.arange(self.video.shape[0])/self.camera_rate
         return self._time
 
-    def _read_dac_coldata(self, name):
+    @property
+    def time_full(self):
+        """Time axis sampled at the camera frame rate."""
+        if not hasattr(self, '_time_full'):
+            self._time_full = np.arange(self.voltage_full.size) / \
+                              self.daq_rate
+        return self._time_full
+
+    def _read_dac_coldata(self, name, downsample=True):
         """Read the column `name` from self.daq and downsample to camera rate.
         """
         decimate = self.daq_rate/self.camera_rate
         coldata = np.array(self.daq[name])
-        coldata = coldata.reshape(coldata.size/decimate, decimate).mean(1)
-        return coldata[self._drop_frames:]
+        if downsample:
+            coldata = coldata.reshape(coldata.size/decimate, decimate).mean(1)
+            coldata = coldata[self._drop_frames:]
+        return coldata
+
+    @property
+    def voltage_full(self):
+        """Voltage at the full DAQ acquisition rate."""
+        if not hasattr(self, '_voltage_full'):
+            self._voltage_full = self._read_dac_coldata('AI V_m',
+                                                        downsample=False)
+        return self._voltage_full
+
+    @property
+    def current_full(self):
+        """Current at the full DAQ acquisition rate."""
+        if not hasattr(self, '_current_full'):
+            self._current_full = self._read_dac_coldata('AI scaled',
+                                                        downsample=False)
+        return self._current_full
 
     @property
     def voltage(self):
