@@ -12,9 +12,15 @@ Notebooks for data analysis of the voltage-sensing patch-clamp experiment.
 
 # Requirements
 
+Running this notebooks requires python and a small set of scientific libraries. 
 The detailed list of dependencies can be found in [`environment.yml`](https://github.com/tritemio/voltagesensing/blob/master/environment.yml).
 
-To recreate a conda environment with all the dependencies (and the exact versions):
+To automatically re-create the computational environment used here please
+install the scientific python distribution Continuum Ananconda and follow 
+the instructions below.
+
+Once `conda` is installed (included in Anaconda), recreate an environment with 
+all the dependencies (and their exact versions):
 
 ```
 conda env create --name=voltagesensing_env --file=environment.yml
