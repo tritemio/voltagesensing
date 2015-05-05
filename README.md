@@ -12,7 +12,7 @@ Notebooks for data analysis of the voltage-sensing patch-clamp experiment.
 
 # Requirements
 
-The detailed list of dependencies can be found in `environment.yml`.
+The detailed list of dependencies can be found in [`environment.yml`](https://github.com/tritemio/voltagesensing/blob/master/environment.yml).
 
 To recreate a conda environment with all the dependencies (and the exact versions):
 
