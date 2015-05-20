@@ -19,14 +19,16 @@ To automatically re-create the computational environment used here please
 install the scientific python distribution Continuum Ananconda and follow 
 the instructions below.
 
-Once `conda` is installed (included in Anaconda), recreate an environment with 
-all the dependencies (and their exact versions):
+Anaconda will install the latest version of all the major scientific python libraries.
+For long term reproducibility, you can re-create an enviroment containing the exact version 
+of each libray used in the present analysis by typing the following command in a terminal
+(*cmd.exe* on Windows, *Terminal* app on OSX):
 
 ```
 conda env create --name=voltagesensing_env --file=environment.yml
 ```
 
-The new environment can be activate with (Windows):
+The environment must be activated to be used. On windows type in a terminal:
 
 ```
 activate voltagesensing_env
@@ -38,6 +40,17 @@ or with (Linux, Mac OSX):
 source activate voltagesensing_env
 ```
 
+Now, in the same terminal use for the previous command, launch the Jupyter/IPython Notebook with:
 
+```
+ipython notebook
+```
 
+This last command will open a browser showing the Jupyter Notebook dashboard 
+(recommended browser Firefox or Chrome).
+From the dashboard enter the folder containing a copy of the present repository, 
+then click on one of the provided notebooks.
 
+If it's the first time you open a notebook, we suggest to take a quick tour of the interface 
+by clicking on the menu *Help* -> *User Interface Tour*. 
+Further information the Notebook applications can be found on http://ipython.org/notebook.html.
