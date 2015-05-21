@@ -81,6 +81,19 @@ def get_timetrace(video, point, clip_radius=1.5, detrend_sigma=None,
 
 def get_on_periods_slices(timetrace, threshold, lowpass_sigma=15, align=4):
     """Returns a list of slices selecting the on-periods during blinking.
+
+    Arguments:
+        timetrace (array): the raw (possibly detrended) input timetrace.
+        threshold (float): the discrimination threshold to differentiate
+            between ON and OFF blinking periods.
+        lowpass_sigma (float): sigma of the low-pass Gaussian filter applied
+            to the timetrace before applying the threshold.
+        align (int): quantize the start-stop values of each ON blinking
+            period to a multiple of this value.
+
+    Returns:
+        A list of slices with start-stop values indentifying each ON blinking
+        period in the input timtrace.
     """
     lp_timetrace = ndi.filters.gaussian_filter1d(timetrace, lowpass_sigma)
     on_mask = lp_timetrace >= threshold
