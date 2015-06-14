@@ -59,4 +59,4 @@ then click on one of the provided notebooks.
 
 If it's the first time you open a notebook, we suggest to take a quick tour of the interface 
 by clicking on the menu *Help* -> *User Interface Tour*. 
-Further information the Notebook applications can be found on http://ipython.org/notebook.html.
+Further information on the *Jupyter Notebook Application* can be found at http://ipython.org/notebook.html.
