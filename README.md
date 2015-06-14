@@ -1,6 +1,6 @@
 # patchclamp
 
-Notebooks for data analysis of the voltage-sensing patch-clamp experiment.
+Jupyter Notebooks for data analysis of the voltage-sensing patch-clamp experiment.
 
 *[Notebooks Index](http://nbviewer.ipython.org/github/tritemio/voltagesensing/tree/master/)*
 
@@ -10,9 +10,15 @@ Notebooks for data analysis of the voltage-sensing patch-clamp experiment.
 - [Patch Clamp Analysis - Phase offset-fov1](http://nbviewer.ipython.org/github/tritemio/voltagesensing/blob/master/Patch%20Clamp%20Analysis%20-%20Phase%20offset-fov1.ipynb)
 - [Patch Clamp Analysis - FFT](http://nbviewer.ipython.org/github/tritemio/voltagesensing/blob/master/Patch%20Clamp%20Analysis%20-%20FFT.ipynb)
 
+
 # Requirements
 
-Running this notebooks requires python and a small set of scientific libraries. 
+> Users with no experience with python and the jupyter notebooks should read:
+> 
+> - [Jupyter/IPython Notebook Quick Start Guide](http://jupyter-notebook-beginner-guide.readthedocs.org/)
+
+
+Running these notebooks requires python and a small set of scientific libraries. 
 The detailed list of dependencies can be found in [`environment.yml`](https://github.com/tritemio/voltagesensing/blob/master/environment.yml).
 
 To automatically re-create the computational environment used here please
