@@ -1,0 +1,59 @@
+name: C:\Users\laser2002j\Miniconda3\envs\voltagesensing_env_py3
+dependencies:
+- decorator=4.0.4=py34_0
+- future=0.15.2=py34_0
+- ipykernel=4.1.1=py34_0
+- ipython=4.0.0=py34_1
+- ipython_genutils=0.1.0=py34_0
+- ipywidgets=4.1.0=py34_0
+- jinja2=2.8=py34_0
+- jpeg=8d=vc10_0
+- jsonschema=2.4.0=py34_0
+- jupyter=1.0.0=py34_0
+- jupyter_client=4.1.1=py34_0
+- jupyter_console=4.0.3=py34_0
+- jupyter_core=4.0.6=py34_0
+- libpng=1.6.17=vc10_1
+- libsodium=1.0.3=0
+- libtiff=4.0.6=vc10_0
+- markupsafe=0.23=py34_0
+- mistune=0.7.1=py34_0
+- msvc_runtime=1.0.0=vc10_0
+- nbconvert=4.0.0=py34_0
+- nbformat=4.0.1=py34_0
+- notebook=4.0.6=py34_0
+- numpy=1.10.1=py34_0
+- openssl=1.0.2d=vc10_0
+- pandas=0.17.0=np110py34_0
+- path.py=8.1.2=py34_0
+- pickleshare=0.5=py34_0
+- pip=7.1.2=py34_0
+- pygments=2.0.2=py34_0
+- pyparsing=2.0.3=py34_0
+- pyqt=4.11.4=py34_2
+- pyreadline=2.1=py34_0
+- python=3.4.3=3
+- python-dateutil=2.4.2=py34_0
+- pytz=2015.7=py34_0
+- pyzmq=14.7.0=py34_1
+- qt=4.8.7=vc10_4
+- qtconsole=4.1.0=py34_0
+- scipy=0.16.0=np110py34_0
+- seaborn=0.6.0=np110py34_0
+- setuptools=18.4=py34_0
+- simplegeneric=0.8.1=py34_0
+- sip=4.16.9=py34_1
+- six=1.10.0=py34_0
+- tk=8.5.18=vc10_0
+- tornado=4.2.1=py34_1
+- traitlets=4.0.0=py34_0
+- wheel=0.26.0=py34_1
+- zeromq=4.1.3=vc10_1
+- zlib=1.2.8=vc10_2
+- pip:
+  - cycler==0.9.0
+  - ipython-genutils==0.1.0
+  - jupyter-client==4.1.1
+  - jupyter-console==4.0.3
+  - jupyter-core==4.0.6
+  - matplotlib==1.5.0
